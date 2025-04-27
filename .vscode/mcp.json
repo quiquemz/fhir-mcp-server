@@ -1,0 +1,12 @@
+{
+  "servers": {
+    "fhir-mcp": {
+      "type": "stdio",
+      "command": "dotnet",
+      "args": ["run", "--project", "/Users/{your-username}/{your-path}/fhir-mcp/FhirMcpServer/FhirMcpServer.csproj"],
+      "env": {
+        "FHIR_SERVER_URL": "http://localhost:8080/hapi-fhir-jpaserver/fhir"
+      }
+    }
+  }
+}

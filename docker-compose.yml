@@ -1,0 +1,49 @@
+services:
+  hapi-fhir-server:
+    image: smartonfhir/hapi-5:r4-synthea
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: curl -f http://localhost:8080/hapi-fhir-jpaserver/fhir/metadata || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+
+  azure-fhir-server:
+    image: mcr.microsoft.com/healthcareapis/r4-fhir-server:latest
+    depends_on:
+      mssql:
+        condition: service_healthy
+    environment:
+      FHIRServer__Security__Enabled: "false"
+      SqlServer__ConnectionString: "Server=mssql;Initial Catalog=FHIR;Persist Security Info=False;User ID=sa;Password=${SA_PASSWORD};MultipleActiveResultSets=False;TrustServerCertificate=true;Connection Timeout=30"
+      SqlServer__AllowDatabaseCreation: "true"
+      SqlServer__Initialize: "true"
+      SqlServer__SchemaOptions__AutomaticUpdatesEnabled: "true"
+      DataStore: "SqlServer"
+      DOTNET_EnableWriteXorExecute: "0"
+    ports:
+      - "8081:8080"
+    healthcheck:
+      test: curl -f http://localhost:8080 || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 15
+      start_period: 5s
+  
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      SA_PASSWORD: ${SA_PASSWORD}
+      ACCEPT_EULA: "Y"
+    ports:
+      - "1431:1433"
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P ${SA_PASSWORD} -Q "SELECT * FROM INFORMATION_SCHEMA.TABLES" -C -M -v TrustServerCertificate=true || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+  
+  
