@@ -3,6 +3,17 @@
 A C#-based Model Context Protocol (MCP) server that enables interaction with FHIR servers. This server is primarily
 designed for developers working with FHIR R4 implementations.
 
+## Demo
+
+This demo highlights some of the MCP server's when combined with Claude client: 
+1. Generating synthetic data
+2. Searching for patients and related resources 
+3. Visualizing the results through a graphical representation.
+
+![Demo](./demo/mcp-demo-short.gif)
+
+Here is a link of the full demo: [MCP Server Demo](./demo/mcp-demo-long.mp4)
+
 ## Tools
 
 ### CRUD, Search and Other Helpful Operations
