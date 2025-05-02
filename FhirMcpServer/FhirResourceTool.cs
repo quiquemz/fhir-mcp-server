@@ -171,7 +171,7 @@ public class FhirResourceTool(FhirClient client) : FhirToolBase(client)
 
     [McpServerTool, Description(
          """
-         Performs a FHIR transaction with a bundle of operations.
+         Performs a FHIR transaction with a bundle of operation. All operations in the bundle will be treated as a single atomic unit - either all succeed or all fail.
          body: JSON string representing a Bundle with type 'transaction'.
          """
      )]
@@ -191,6 +191,32 @@ public class FhirResourceTool(FhirClient client) : FhirToolBase(client)
         catch (Exception ex)
         {
             return $"Transaction failed: {ex.Message}";
+        }
+    }
+
+    // Execute Batch
+    [McpServerTool, Description(
+         """
+         Performs a FHIR batch with a bundle of operation. Each operation in the batch is processed independently - some may succeed while others fail.
+         body: JSON string representing a Bundle with type 'batch'.
+         """
+     )]
+    public async Task<string> ExecuteBatch(string body)
+    {
+        var bundle = Parser.Parse<Bundle>(body);
+        if (bundle.Type != Bundle.BundleType.Batch)
+            return "Bundle must have type 'batch'.";
+
+        try
+        {
+            var result = await Client.TransactionAsync(bundle);
+            return result != null
+                ? await Serializer.SerializeToStringAsync(result)
+                : "Unable to complete batch.";
+        }
+        catch (Exception ex)
+        {
+            return $"Batch failed: {ex.Message}";
         }
     }
 }
